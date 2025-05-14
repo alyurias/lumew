@@ -1,0 +1,137 @@
+<resources>
+    <string name="app_name">LumeW</string>
+    <string name="auth_subtitle">Welcome back! Please sign in</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="no_account_register">Don\'t have an account? Register</string>
+    <string name="have_account_login">Already have an account? Login</string>
+    <string name="app_logo">Lumew Logo</string>
+    <string name="view_empty_state" />
+    <string name="movie_poster_desc" />
+    <string name="search_empty_desc">Empty search results</string>
+
+
+    <string name="back">Back</string>
+    <string name="profile_picture">Profile picture</string>
+    <string name="display_name">Display Name</string>
+    <string name="username">Username</string>
+    <string name="bio">Bio</string>
+    <string name="save">Save Profile</string>
+    <string name="search_movies">Search movies...</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="preferences">Preferences</string>
+    <string name="account_info">Account &amp; Info</string>
+    <string name="dark_mode">Dark Mode</string>
+
+    <string name="account_settings">Account Settings</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="about">About</string>
+
+    <string name="delete_account">Delete Account</string>
+
+
+    <!-- Dialog messages -->
+    <string name="logout_confirmation">Are you sure you want to logout?</string>
+    <string name="delete_account_confirmation">Are you sure you want to permanently delete your account? This action cannot be undone.</string>
+
+
+    <!-- Content -->
+    <string name="privacy_policy_content">[Your privacy policy content here]</string>
+    <string name="terms_of_service_content">[Your terms of service content here]</string>
+    <string name="about_content">Lumew v1.0\n© 2023 Lumew Team</string>
+    <string name="delete">Delete</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="logout">Logout</string>
+    <string name="version_format">Version %s</string>
+    <string name="profile_image">Profile image</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="sign_in">Sign In</string>
+    <string name="your_library">Your Library</string>
+
+    <string name="movie_poster">Movie poster</string>
+    <string name="remove_movie">Remove movie</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="notifications">Notifications</string>
+    <string name="profile">Profile</string>
+    <string name="version" />
+    <string name="more">more</string>
+    <string name="account">account\n</string>
+    <string name="app_settings">app settings</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_message">Are you sure you want to logout?</string>
+    <string name="logout_success">Logged out successfully</string>
+    <string name="delete_account_title">Delete Account</string>
+    <string name="delete_account_message">Are you sure you want to permanently delete your account? This action cannot be undone.</string>
+    <string name="account_deleted_success">Account deleted successfully</string>
+    <string name="account_deletion_failed">Failed to delete account</string>
+    <string name="data_deletion_failed">Failed to delete user data</string>
+    <string name="about_app">about app</string>
+    <string name="appearance">appearance</string>
+    <string name="back_button">back button</string>
+    <string name="about_title" />
+
+
+
+    <string name="press_back_again_to_exit">Press back again to exit</string>
+
+        <string name="terms_of_service_title">Terms of Service</string>
+
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_text">Your privacy policy content goes here...</string>
+
+
+
+        <!-- Placeholder content for dialogs -->
+
+        <string name="about_text">Lumew App\nVersion 1.0\nCreated for "Razvoj mobilnih aplikacija" subject</string>
+    <string name="movies">movies</string>
+    <string name="sample_username">username</string>
+
+
+    <string name="toolbar_desc">Profile toolbar</string>
+    <string name="profile_image_desc">Profile picture</string>
+    <string name="username_hint">Username</string>
+    <string name="bio_hint">About you</string>
+    <string name="update_profile">Update Profile</string>
+
+    <string name="loading_desc">Loading content</string>
+    <string name="settings_desc">Settings</string>
+    <string name="deleting_account">deleting account</string>
+    <string name="no_user_logged_in">no user logged in</string>
+    <string name="notifications_list">Notifications list</string>
+
+
+    <string name="imdb_rating_format">IMDb: %s</string>
+    <string name="error_loading_movie">Failed to load movie details</string>
+    <string name="no_movie_data">No movie data provided</string>
+    <string name="mark_all_as_read">Mark all as read</string>
+    <string name="no_notifications_yet">No notifications yet</string>
+    <string name="notification_type_icon">Notification type icon</string>
+    <string name="notification_image">Notification image</string>
+    <string name="mark_as_read">Mark as read</string>
+    <string name="notification_marked_read">Notification marked as read</string>
+    <string name="notification_marked_unread">Notification marked as unread</string>
+    <string name="terms_of_service_text">terms of service</string>
+
+    <string name="no_movies_found">No movies found</string>
+    <string name="notifications_icon">notification</string>
+    <string name="movie_backdrop">notification</string><string name="error_loading_movies">Error loading movies</string>
+    <string name="movie_added_to_library">%1$s added to library</string>
+    <string name="save_failed">Save failed: %1$s</string>
+    <string name="movie_skipped">Skipped %1$s</string>
+    <string name="movie_saved">%s saved</string>
+
+    <string name="info_button_desc" />
+
+
+
+
+</resources>

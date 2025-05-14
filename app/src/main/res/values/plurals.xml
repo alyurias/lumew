@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="movie_count">
+        <item quantity="zero">No movies</item>
+        <item quantity="one">1 movie</item>
+        <item quantity="other">%d movies</item>
+    </plurals>
+</resources>

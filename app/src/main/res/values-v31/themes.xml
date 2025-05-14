@@ -1,0 +1,24 @@
+<resources>
+    <!-- Modern Splash Screen (API 31+) with AppCompat compatibility -->
+    <style name="Theme.App.Starting" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Splash screen attributes -->
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.LumeW</item>
+
+        <!-- Required AppCompat items -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.LumeW.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/logo</item>
+        <!-- Ključna linija - postavlja boju kruga da se poklapa s pozadinom -->
+
+
+        <item name="android:windowSplashScreenIconBackgroundColor">@null</item>
+        <item name="postSplashScreenTheme">@style/Theme.LumeW</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
+    </style>
+</resources>

@@ -1,0 +1,31 @@
+<resources>
+
+    <color name="primary">#121212</color>
+    <color name="primary_variant">#1E1E1E</color>
+    <color name="secondary">#FBB03B</color>
+    <color name="secondary_variant">#E6A035</color>
+
+
+
+
+    <color name="background">#FAFAFA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#121212</color>
+    <color name="surface_variant">#F5F5F5</color>
+    <color name="on_surface_variant">#424242</color>
+
+
+    <color name="text_primary">#121212</color>
+    <color name="text_secondary">#616161</color>
+
+    <!-- Add these new colors -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- For splash screen (if needed) -->
+    <color name="splash_background">@color/primary</color>
+
+    <!-- Notification specific colors -->
+    <color name="unread_notification_bg">#FFF8E6</color>
+    <color name="read_notification_bg">@color/surface</color>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "427750876589",
+    "project_id": "lumew-c4cde",
+    "storage_bucket": "lumew-c4cde.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427750876589:android:9fa3d49f9b6373fcfded24",
+        "android_client_info": {
+          "package_name": "com.example.lumew"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdOR3JL-Vm2Y13ssDr78OGnIVg9p0eifY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
