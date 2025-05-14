@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    android:padding="20dp">
+    android:padding="16dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -13,9 +13,10 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="8dp">
 
-        <RelativeLayout
+
+    <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="450dp">
+            android:layout_height="600dp">
 
             <!-- Movie Poster -->
             <ImageView
@@ -31,30 +32,23 @@
                 android:layout_alignParentBottom="true"
                 android:background="@drawable/gradient_black_transparent"/>
 
-            <!-- Info Button -->
+            <!-- Info Section Background -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/gradient_black_transparent"/>
 
             <!-- Movie Title -->
-
-            <ImageButton
-                android:id="@+id/info_button"
-                android:layout_width="295dp"
-                android:layout_height="241dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="4dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/info_button_desc"
-                android:src="@drawable/info"
-                app:tint="@android:color/white" />
-
             <TextView
                 android:id="@+id/movie_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/info_button"
-                android:layout_marginBottom="8dp"
+                android:layout_above="@+id/movie_year"
+                android:layout_marginBottom="4dp"
                 android:paddingHorizontal="16dp"
                 android:textColor="#FFFFFF"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"/>
 
             <!-- Movie Year -->
@@ -62,10 +56,26 @@
                 android:id="@+id/movie_year"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/movie_title"
+                android:layout_above="@+id/info_button"
+                android:layout_marginBottom="12dp"
                 android:paddingHorizontal="16dp"
                 android:textColor="#CCFFFFFF"
-                android:textSize="16sp"/>
+                android:textSize="14sp"/>
+
+            <!-- Small Info Button -->
+            <ImageButton
+                android:id="@+id/info_button"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/info_desc"
+                android:padding="8dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/info"
+                app:tint="@android:color/white" />
 
             <!-- Swipe Indicators -->
             <TextView
@@ -75,9 +85,9 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_margin="16dp"
-                android:text="Like"
-                android:textColor="#9FD7A3"
-                android:textSize="24sp"
+                android:text="LIKE"
+                android:textColor="#8EC790"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:visibility="invisible"/>
 
@@ -88,9 +98,9 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true"
                 android:layout_margin="16dp"
-                android:text="Pass"
-                android:textColor="#AF807A"
-                android:textSize="24sp"
+                android:text="PASS"
+                android:textColor="#B1766F"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:visibility="invisible"/>
         </RelativeLayout>

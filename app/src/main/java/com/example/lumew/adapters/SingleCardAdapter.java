@@ -1,15 +1,16 @@
 package com.example.lumew.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.appcompat.app.AlertDialog;
 import com.bumptech.glide.Glide;
 import com.example.lumew.R;
+import com.example.lumew.activities.MovieDetailActivity;
 import com.example.lumew.models.Movie;
 import com.example.lumew.utils.SwipeHelper;
 import java.util.List;
@@ -69,8 +70,12 @@ public class SingleCardAdapter {
                 .centerCrop()
                 .into(posterImage);
 
-        // Info Button Click
-        infoButton.setOnClickListener(v -> showMovieDetails(movie));
+        // Info Button Click - Navigate to Detail Activity
+        infoButton.setOnClickListener(v -> {
+            Intent intent = new Intent(context, MovieDetailActivity.class);
+            intent.putExtra("movie", movie);
+            context.startActivity(intent);
+        });
 
         // Swipe Handling
         new SwipeHelper(cardView, likeIndicator, dislikeIndicator, new SwipeHelper.SwipeCallback() {
@@ -98,23 +103,6 @@ public class SingleCardAdapter {
         });
 
         container.addView(cardView);
-    }
-
-    private void showMovieDetails(Movie movie) {
-        String details = String.format(
-                "Director: %s\n\nActors: %s\n\nGenre: %s\n\nRating: %s\n\nPlot: %s",
-                movie.getDirector(),
-                movie.getActors(),
-                movie.getGenre(),
-                movie.getImdbRating(),
-                movie.getPlot()
-        );
-
-        new AlertDialog.Builder(context)
-                .setTitle(movie.getTitle() + " (" + movie.getYear() + ")")
-                .setMessage(details)
-                .setPositiveButton("OK", null)
-                .show();
     }
 
     private void handleSwipe(boolean isRight, Movie movie) {

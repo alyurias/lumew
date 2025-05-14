@@ -130,8 +130,8 @@
     <string name="movie_saved">%s saved</string>
 
     <string name="info_button_desc" />
-
-
+    <string name="info_desc" />
+    <string name="backdrop_desc">Movie backdrop image</string>
 
 
 </resources>

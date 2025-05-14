@@ -119,15 +119,11 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
 
     @Override
     public void onMovieClick(Movie movie) {
-        if (getActivity() != null && !isDetached()) {
-            Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
-            if (movie.getImdbID() != null) {
-                intent.putExtra(MovieDetailActivity.EXTRA_MOVIE_ID, movie.getImdbID());
-            } else {
-                intent.putExtras(MovieDetailActivity.createIntentExtras(movie));
-            }
-            startActivity(intent);
-        }
+        if (getActivity() == null || isDetached()) return;
+
+        Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
+        intent.putExtra("movie", movie); // Simplified key name
+        startActivity(intent);
     }
 
     @Override
