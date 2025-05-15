@@ -132,6 +132,10 @@
     <string name="info_button_desc" />
     <string name="info_desc" />
     <string name="backdrop_desc">Movie backdrop image</string>
+    <string name="search_icon">search icon</string>
+    <string name="search_hint">search hint</string>
+    <string name="empty_state_image">empty state image</string>
+    <string name="search_empty_state">search empty state</string>
 
 
 </resources>

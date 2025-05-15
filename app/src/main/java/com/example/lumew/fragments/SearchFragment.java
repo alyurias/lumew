@@ -9,6 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,6 +43,9 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
             performSearch(searchInput.getText().toString().trim());
         }
     };
+    private ProgressBar loadingProgressBar;
+    private LinearLayout emptyStateLayout;
+    private TextView emptyStateText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,9 +62,18 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
     private void setupViews(View view) {
         searchInput = view.findViewById(R.id.search_edit_text);
         moviesRecyclerView = view.findViewById(R.id.movies_recycler_view);
+        loadingProgressBar = view.findViewById(R.id.loading_progress_bar);
+        emptyStateLayout = view.findViewById(R.id.empty_state_layout);
+        emptyStateText = view.findViewById(R.id.empty_state_text);
+
+        // If these views don't exist in your layout, you'll need to add them
+
         adapter = new MovieGridAdapter(requireContext(), moviesList, this);
         moviesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         moviesRecyclerView.setAdapter(adapter);
+
+        // Initially hide results and show empty state
+        showEmptyState("Search for movies");
     }
 
     private void setupSearchInput() {
@@ -71,9 +86,15 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
                 searchHandler.removeCallbacks(searchRunnable);
                 String query = s.toString().trim();
                 if (query.length() >= 3) {
+                    showLoading();
                     searchHandler.postDelayed(searchRunnable, SEARCH_DELAY_MS);
                 } else {
                     clearResults();
+                    if (query.isEmpty()) {
+                        showEmptyState("Search for movies");
+                    } else {
+                        showEmptyState("Type at least 3 characters to search");
+                    }
                 }
             }
         });
@@ -95,11 +116,15 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
 
     private void updateMoviesList(List<Movie> movies) {
         requireActivity().runOnUiThread(() -> {
+            hideLoading();
             moviesList.clear();
-            if (movies != null) {
+            if (movies != null && !movies.isEmpty()) {
                 moviesList.addAll(movies);
+                adapter.notifyDataSetChanged();
+                showResults();
+            } else {
+                showEmptyState("No movies found");
             }
-            adapter.notifyDataSetChanged();
         });
     }
 
@@ -112,9 +137,47 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
 
     private void showError(String message) {
         requireActivity().runOnUiThread(() -> {
+            hideLoading();
             Toast.makeText(getContext(), "Search error: " + message, Toast.LENGTH_SHORT).show();
+            showEmptyState("Error searching for movies");
             clearResults();
         });
+    }
+
+    private void showLoading() {
+        if (loadingProgressBar != null) {
+            loadingProgressBar.setVisibility(View.VISIBLE);
+        }
+        if (emptyStateLayout != null) {
+            emptyStateLayout.setVisibility(View.GONE);
+        }
+        moviesRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void hideLoading() {
+        if (loadingProgressBar != null) {
+            loadingProgressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void showResults() {
+        moviesRecyclerView.setVisibility(View.VISIBLE);
+        if (emptyStateLayout != null) {
+            emptyStateLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void showEmptyState(String message) {
+        if (emptyStateLayout != null) {
+            emptyStateLayout.setVisibility(View.VISIBLE);
+            if (emptyStateText != null) {
+                emptyStateText.setText(message);
+            }
+        }
+        moviesRecyclerView.setVisibility(View.GONE);
+        if (loadingProgressBar != null) {
+            loadingProgressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -64,7 +64,25 @@ public class RapidApiClient {
         String url = getAbsoluteUrl("imdb/search");
         RequestParams params = new RequestParams();
         params.put("query", query);
-        params.put("limit", "20");
+        params.put("type", "movie"); // Add type parameter for better results
+        params.put("limit", "20");   // Limit to 20 results
+
+        Log.d(TAG, "Searching for movies with query: " + query);
+        makeListRequest(url, params, listener);
+    }
+
+    // Method to search movies with additional parameters
+    public static void searchMoviesByGenre(String genre, String sortOrder, String sortField, int rows,
+                                           final OnMoviesLoadedListener listener) {
+        String url = getAbsoluteUrl("imdb/search");
+        RequestParams params = new RequestParams();
+        params.put("type", "movie");
+        params.put("genre", genre);
+        params.put("rows", String.valueOf(rows));
+        params.put("sortOrder", sortOrder);
+        params.put("sortField", sortField);
+
+        Log.d(TAG, "Searching for movies by genre: " + genre);
         makeListRequest(url, params, listener);
     }
 
@@ -74,15 +92,19 @@ public class RapidApiClient {
 
     private static void makeListRequest(String url, RequestParams params,
                                         final OnMoviesLoadedListener listener) {
+        Log.d(TAG, "Making API request to: " + url + " with params: " + (params != null ? params.toString() : "none"));
+
         client.get(url, params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Log.d(TAG, "API request successful with status code: " + statusCode);
                 handleListResponse(responseBody, listener);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,
                                   byte[] responseBody, Throwable error) {
+                Log.e(TAG, "API request failed with status code: " + statusCode);
                 handleFailure(statusCode, responseBody, error, listener);
             }
         });
@@ -90,15 +112,19 @@ public class RapidApiClient {
 
     private static void makeSingleRequest(String url, RequestParams params,
                                           final OnMovieLoadedListener listener) {
+        Log.d(TAG, "Making API request to: " + url + " with params: " + (params != null ? params.toString() : "none"));
+
         client.get(url, params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Log.d(TAG, "API request successful with status code: " + statusCode);
                 handleSingleResponse(responseBody, listener);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,
                                   byte[] responseBody, Throwable error) {
+                Log.e(TAG, "API request failed with status code: " + statusCode);
                 handleFailure(statusCode, responseBody, error, listener);
             }
         });
@@ -203,6 +229,25 @@ public class RapidApiClient {
 
         // If not array, try to parse as object
         JSONObject responseObj = new JSONObject(jsonResponse);
+
+        // Try to get results from search endpoint format
+        JSONArray results = responseObj.optJSONArray("results");
+        if (results != null) {
+            for (int i = 0; i < results.length(); i++) {
+                try {
+                    JSONObject item = results.getJSONObject(i);
+                    Movie movie = parseMovieFromJson(item);
+                    if (isValidMovie(movie)) {
+                        movies.add(movie);
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "Skipping invalid movie item at position " + i, e);
+                }
+            }
+            return movies;
+        }
+
+        // Try to get items from top250 endpoint format
         JSONArray items = responseObj.optJSONArray("items");
         if (items != null) {
             for (int i = 0; i < items.length(); i++) {
@@ -234,15 +279,55 @@ public class RapidApiClient {
     private static Movie parseMovieFromJson(JSONObject item) throws JSONException {
         Movie movie = new Movie();
 
-        // Required fields
-        movie.setImdbID(item.optString("id", ""));
-        movie.setTitle(item.optString("primaryTitle", item.optString("title", "Unknown Title")));
+        // Handle different API response formats
+        String id = item.optString("id", "");
+        if (id.isEmpty()) {
+            id = item.optString("imdbId", "");
+        }
+        movie.setImdbID(id);
+
+        // Handle different title fields
+        String title = item.optString("primaryTitle", "");
+        if (title.isEmpty()) {
+            title = item.optString("title", "");
+        }
+        if (title.isEmpty()) {
+            title = item.optString("name", "Unknown Title");
+        }
+        movie.setTitle(title);
+
+        // Handle different year fields
+        String year = item.optString("startYear", "");
+        if (year.isEmpty()) {
+            year = item.optString("year", "N/A");
+        }
+        movie.setYear(year);
+
+        // Handle different image/poster fields
+        String poster = item.optString("primaryImage", "");
+        if (poster.isEmpty()) {
+            poster = item.optString("image", "");
+        }
+        if (poster.isEmpty()) {
+            poster = item.optString("posterUrl", "");
+        }
+        movie.setPoster(poster);
+
+        // Handle different rating fields
+        String rating = item.optString("averageRating", "");
+        if (rating.isEmpty()) {
+            rating = item.optString("imDbRating", "0.0");
+        }
+        movie.setImdbRating(rating);
+
+        // Handle different description/plot fields
+        String plot = item.optString("description", "");
+        if (plot.isEmpty()) {
+            plot = item.optString("plot", "No plot available");
+        }
+        movie.setPlot(plot);
 
         // Optional fields
-        movie.setYear(item.optString("startYear", item.optString("year", "N/A")));
-        movie.setPoster(item.optString("primaryImage", item.optString("image", "")));
-        movie.setImdbRating(item.optString("averageRating", item.optString("imDbRating", "0.0")));
-        movie.setPlot(item.optString("description", item.optString("plot", "No plot available")));
         movie.setGenre(item.optString("genres", ""));
         movie.setRuntime(item.optString("runtimeMinutes", "N/A") + " mins");
         movie.setReleased(item.optString("releaseDate", ""));
