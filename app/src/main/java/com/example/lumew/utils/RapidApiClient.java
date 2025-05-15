@@ -69,14 +69,20 @@ public class RapidApiClient {
         makeSingleRequest(url, params, listener);
     }
 
-    public static void searchMovies(String query, final OnMoviesLoadedListener listener) {
+    public static void searchMovies(String query, String yearFilter, final OnMoviesLoadedListener listener) {
         String url = getAbsoluteUrl("imdb/search");
         RequestParams params = new RequestParams();
-        params.put("primaryTitleAutocomplete", query);  // Use autocomplete parameter
-        params.put("type", "movie");  // Filter for movies only
-        params.put("rows", "25");     // Limit results
+        params.put("primaryTitleAutocomplete", query);
+        params.put("type", "movie");
+        params.put("rows", "25");
 
-        Log.d(TAG, "Searching for movies with query: " + query);
+        if (yearFilter != null) {
+            String[] years = yearFilter.split("-");
+            params.put("startYearFrom", years[0]);
+            params.put("startYearTo", years[1]);
+        }
+
+        Log.d(TAG, "Searching for movies with query: " + query + ", year filter: " + yearFilter);
         makeListRequest(url, params, listener);
     }
 

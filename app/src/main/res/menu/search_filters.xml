@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/filter_all"
+            android:title="All Years"
+            android:checked="true"/>
+        <item
+            android:id="@+id/filter_80s"
+            android:title="1980s"/>
+        <item
+            android:id="@+id/filter_90s"
+            android:title="1990s"/>
+        <item
+            android:id="@+id/filter_2000s"
+            android:title="2000s"/>
+        <item
+            android:id="@+id/filter_2010s"
+            android:title="2010s"/>
+    </group>
+</menu>

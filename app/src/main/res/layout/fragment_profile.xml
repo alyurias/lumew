@@ -44,6 +44,8 @@
              />
 
         <!-- Bio -->
+
+        <!-- Movie Count -->
         <TextView
             android:id="@+id/profile_bio"
             android:layout_width="wrap_content"
@@ -53,7 +55,6 @@
             android:textSize="14sp"
             tools:text="This is my bio description" />
 
-        <!-- Movie Count -->
         <TextView
             android:id="@+id/profile_movie_count"
             android:layout_width="wrap_content"

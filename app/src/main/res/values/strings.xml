@@ -136,6 +136,8 @@
     <string name="search_hint">search hint</string>
     <string name="empty_state_image">empty state image</string>
     <string name="search_empty_state">search empty state</string>
+    <string name="filter_button_desc">Filter movies by decade</string>
+
 
 
 </resources>

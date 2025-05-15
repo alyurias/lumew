@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +48,8 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
     private ProgressBar loadingProgressBar;
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
+    private ImageButton filterButton;
+    private String currentYearFilter = null; // null means no filter
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +61,7 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
         super.onViewCreated(view, savedInstanceState);
         setupViews(view);
         setupSearchInput();
+        setupFilterButton(); // Add this line
     }
 
     private void setupViews(View view) {
@@ -75,6 +80,51 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
         // Initially hide results and show empty state
         showEmptyState("Search for movies");
     }
+
+    private void setupFilterButton() {
+        filterButton = getView().findViewById(R.id.filter_button);
+        filterButton.setOnClickListener(v -> showFilterMenu());
+    }
+
+    private void showFilterMenu() {
+        PopupMenu popup = new PopupMenu(requireContext(), filterButton);
+        popup.getMenuInflater().inflate(R.menu.search_filters, popup.getMenu());
+
+        // Set current selection
+        if (currentYearFilter != null) {
+            if (currentYearFilter.equals("1980-1989")) {
+                popup.getMenu().findItem(R.id.filter_80s).setChecked(true);
+            } else if (currentYearFilter.equals("1990-1999")) {
+                popup.getMenu().findItem(R.id.filter_90s).setChecked(true);
+            } else if (currentYearFilter.equals("2000-2009")) {
+                popup.getMenu().findItem(R.id.filter_2000s).setChecked(true);
+            } else if (currentYearFilter.equals("2010-2019")) {
+                popup.getMenu().findItem(R.id.filter_2010s).setChecked(true);
+            } else {
+                popup.getMenu().findItem(R.id.filter_all).setChecked(true);
+            }
+        }
+
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.filter_80s) {
+                currentYearFilter = "1980-1989";
+            } else if (id == R.id.filter_90s) {
+                currentYearFilter = "1990-1999";
+            } else if (id == R.id.filter_2000s) {
+                currentYearFilter = "2000-2009";
+            } else if (id == R.id.filter_2010s) {
+                currentYearFilter = "2010-2019";
+            } else {
+                currentYearFilter = null;
+            }
+            performSearchWithFilters();
+            return true;
+        });
+
+        popup.show();
+    }
+
 
     private void setupSearchInput() {
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -100,8 +150,16 @@ public class SearchFragment extends Fragment implements OnMovieClickListener {
         });
     }
 
+    private void performSearchWithFilters() {
+        String query = searchInput.getText().toString().trim();
+        if (query.length() >= 3) {
+            showLoading();
+            performSearch(query);
+        }
+    }
+
     private void performSearch(String query) {
-        RapidApiClient.searchMovies(query, new RapidApiClient.OnMoviesLoadedListener() {
+        RapidApiClient.searchMovies(query, currentYearFilter, new RapidApiClient.OnMoviesLoadedListener() {
             @Override
             public void onMoviesLoaded(List<Movie> movies) {
                 updateMoviesList(movies);
