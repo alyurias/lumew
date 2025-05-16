@@ -48,7 +48,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void initializeViews() {
         try {
             // Main container
-            contentContainer = findViewById(R.id.content_container);
+
             progressBar = findViewById(R.id.progress_bar);
 
             // Toolbar
