@@ -23,7 +23,7 @@ import okhttp3.Response;
 
 public class RapidMovieApiService {
     private static final String TAG = "RapidMovieApiService";
-    private static final String API_KEY = "7fec5c329emshd63ec62f6c53adap14ae3bjsne77908f7c737";
+    private static final String API_KEY = "255960d57emsh5ceceafab984506p100ccdjsn4593cc4fa79a";
     private static final String API_HOST = "imdb236.p.rapidapi.com";
     private static final String BASE_URL = "https://imdb236.p.rapidapi.com/";
 

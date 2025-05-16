@@ -21,9 +21,10 @@ import cz.msebera.android.httpclient.Header;
 
 public class RapidApiClient {
     private static final String TAG = "RapidApiClient";
-    private static final String BASE_URL = "https://imdb236.p.rapidapi.com/";
+    // Updated BASE_URL to include the /api/ prefix
+    private static final String BASE_URL = "https://imdb236.p.rapidapi.com/api/";
     private static final String API_HOST = "imdb236.p.rapidapi.com";
-    private static final String API_KEY = "7fec5c329emshd63ec62f6c53adap14ae3bjsne77908f7c737";
+    private static final String API_KEY = "255960d57emsh5ceceafab984506p100ccdjsn4593cc4fa79a";
     private static final int MAX_RETRIES = 3;
     private static final long INITIAL_RETRY_DELAY_MS = 1000;
 
@@ -58,7 +59,9 @@ public class RapidApiClient {
     }
 
     public static void getTop250Movies(final OnMoviesLoadedListener listener) {
+        // Using the correct endpoint path
         String url = getAbsoluteUrl("imdb/top250-movies");
+        Log.d(TAG, "Requesting top 250 movies from URL: " + url);
         makeListRequest(url, null, listener);
     }
 
@@ -124,6 +127,9 @@ public class RapidApiClient {
                 for (Header header : headers) {
                     Log.d(TAG, "Response header: " + header.getName() + " = " + header.getValue());
                 }
+                // Log response body preview for debugging
+                String responsePreview = new String(responseBody);
+                Log.d(TAG, "Response preview: " + responsePreview.substring(0, Math.min(200, responsePreview.length())) + "...");
                 handleListResponse(responseBody, listener);
             }
 
@@ -136,6 +142,10 @@ public class RapidApiClient {
                     for (Header header : headers) {
                         Log.e(TAG, "Error header: " + header.getName() + " = " + header.getValue());
                     }
+                }
+                // Log error response body if available
+                if (responseBody != null && responseBody.length > 0) {
+                    Log.e(TAG, "Error response: " + new String(responseBody));
                 }
                 handleListFailure(statusCode, responseBody, error, listener);
             }
@@ -150,6 +160,8 @@ public class RapidApiClient {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 Log.d(TAG, "API request successful with status code: " + statusCode);
+                String responsePreview = new String(responseBody);
+                Log.d(TAG, "Response preview: " + responsePreview.substring(0, Math.min(200, responsePreview.length())) + "...");
                 handleSingleResponse(responseBody, listener);
             }
 
@@ -157,6 +169,9 @@ public class RapidApiClient {
             public void onFailure(int statusCode, Header[] headers,
                                   byte[] responseBody, Throwable error) {
                 Log.e(TAG, "API request failed with status code: " + statusCode);
+                if (responseBody != null && responseBody.length > 0) {
+                    Log.e(TAG, "Error response: " + new String(responseBody));
+                }
                 handleSingleFailure(statusCode, responseBody, error, listener);
             }
         });
@@ -166,20 +181,21 @@ public class RapidApiClient {
                                            final OnMoviesLoadedListener listener) {
         try {
             String jsonString = new String(responseBody);
-            Log.d(TAG, "API Response: " + jsonString);
+            Log.d(TAG, "API Response: " + jsonString.substring(0, Math.min(500, jsonString.length())) + "...");
 
             List<Movie> movies = parseMoviesResponse(jsonString);
             if (movies.isEmpty()) {
                 notifyError(listener, "No movies found in response");
             } else {
+                Log.d(TAG, "Successfully parsed " + movies.size() + " movies");
                 notifySuccess(listener, movies);
             }
         } catch (JSONException e) {
             Log.e(TAG, "JSON Parsing Error", e);
-            notifyError(listener, "Invalid data format from server");
+            notifyError(listener, "Invalid data format from server: " + e.getMessage());
         } catch (Exception e) {
             Log.e(TAG, "Unexpected Error", e);
-            notifyError(listener, "Failed to process response");
+            notifyError(listener, "Failed to process response: " + e.getMessage());
         }
     }
 
@@ -187,35 +203,31 @@ public class RapidApiClient {
                                              final OnMovieLoadedListener listener) {
         try {
             String jsonString = new String(responseBody);
-            Log.d(TAG, "API Response: " + jsonString);
+            Log.d(TAG, "API Response: " + jsonString.substring(0, Math.min(500, jsonString.length())) + "...");
 
             Movie movie = parseMovieDetailsResponse(jsonString);
             if (movie == null) {
                 notifyError(listener, "No movie details found");
             } else {
+                Log.d(TAG, "Successfully parsed movie: " + movie.getTitle());
                 notifySuccess(listener, movie);
             }
         } catch (JSONException e) {
             Log.e(TAG, "JSON Parsing Error", e);
-            notifyError(listener, "Invalid movie data format");
+            notifyError(listener, "Invalid movie data format: " + e.getMessage());
         } catch (Exception e) {
             Log.e(TAG, "Unexpected Error", e);
-            notifyError(listener, "Failed to process movie details");
+            notifyError(listener, "Failed to process movie details: " + e.getMessage());
         }
     }
 
-    // Fixed: Renamed this method to indicate it's for list requests
     private static void handleListFailure(int statusCode, byte[] responseBody,
                                           Throwable error, final OnMoviesLoadedListener listener) {
         String errorDetails = buildErrorDetails(statusCode, responseBody, error);
         Log.e(TAG, "API Request Failed: " + errorDetails);
-
-        // Fixed: No longer automatically falling back to Top250 movies
-        // Instead, properly notify the user of the error
         notifyError(listener, "Search request failed: " + errorDetails);
     }
 
-    // Fixed: Renamed to match single movie requests
     private static void handleSingleFailure(int statusCode, byte[] responseBody,
                                             Throwable error, final OnMovieLoadedListener listener) {
         String errorDetails = buildErrorDetails(statusCode, responseBody, error);
@@ -252,12 +264,14 @@ public class RapidApiClient {
         // First try to parse as direct array
         try {
             JSONArray jsonArray = new JSONArray(jsonResponse);
+            Log.d(TAG, "Found direct JSON array with " + jsonArray.length() + " items");
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
                     JSONObject item = jsonArray.getJSONObject(i);
                     Movie movie = parseMovieFromJson(item);
                     if (isValidMovie(movie)) {
                         movies.add(movie);
+                        Log.d(TAG, "Added movie from array: " + movie.getTitle());
                     }
                 } catch (JSONException e) {
                     Log.w(TAG, "Skipping invalid movie item at position " + i, e);
@@ -270,6 +284,44 @@ public class RapidApiClient {
 
         // If not array, try to parse as object
         JSONObject responseObj = new JSONObject(jsonResponse);
+
+        // Try top250 endpoint format which often has items array
+        JSONArray items = responseObj.optJSONArray("items");
+        if (items != null) {
+            Log.d(TAG, "Found top250 format with 'items' array of size: " + items.length());
+            for (int i = 0; i < items.length(); i++) {
+                try {
+                    JSONObject item = items.getJSONObject(i);
+                    Movie movie = parseMovieFromJson(item);
+                    if (isValidMovie(movie)) {
+                        movies.add(movie);
+                        Log.d(TAG, "Added movie from items: " + movie.getTitle());
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "Skipping invalid movie item at position " + i, e);
+                }
+            }
+            return movies;
+        }
+
+        // Try results array which is common in search responses
+        JSONArray results = responseObj.optJSONArray("results");
+        if (results != null) {
+            Log.d(TAG, "Found search format with 'results' array of size: " + results.length());
+            for (int i = 0; i < results.length(); i++) {
+                try {
+                    JSONObject item = results.getJSONObject(i);
+                    Movie movie = parseMovieFromJson(item);
+                    if (isValidMovie(movie)) {
+                        movies.add(movie);
+                        Log.d(TAG, "Added movie from results: " + movie.getTitle());
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "Skipping invalid movie item at position " + i, e);
+                }
+            }
+            return movies;
+        }
 
         // Try auto-complete endpoint format which has a 'd' property containing results
         JSONArray dResults = responseObj.optJSONArray("d");
@@ -290,50 +342,15 @@ public class RapidApiClient {
             return movies;
         }
 
-        // Try to get results from search endpoint format
-        JSONArray results = responseObj.optJSONArray("results");
-        if (results != null) {
-            Log.d(TAG, "Found search format with 'results' array");
-            for (int i = 0; i < results.length(); i++) {
-                try {
-                    JSONObject item = results.getJSONObject(i);
-                    Movie movie = parseMovieFromJson(item);
-                    if (isValidMovie(movie)) {
-                        movies.add(movie);
-                    }
-                } catch (JSONException e) {
-                    Log.w(TAG, "Skipping invalid movie item at position " + i, e);
-                }
+        // Try to parse as single movie if no arrays were found
+        try {
+            Movie movie = parseMovieFromJson(responseObj);
+            if (isValidMovie(movie)) {
+                movies.add(movie);
+                Log.d(TAG, "Added single movie: " + movie.getTitle());
             }
-            return movies;
-        }
-
-        // Try to get items from top250 endpoint format
-        JSONArray items = responseObj.optJSONArray("items");
-        if (items != null) {
-            Log.d(TAG, "Found top250 format with 'items' array");
-            for (int i = 0; i < items.length(); i++) {
-                try {
-                    JSONObject item = items.getJSONObject(i);
-                    Movie movie = parseMovieFromJson(item);
-                    if (isValidMovie(movie)) {
-                        movies.add(movie);
-                    }
-                } catch (JSONException e) {
-                    Log.w(TAG, "Skipping invalid movie item at position " + i, e);
-                }
-            }
-        } else {
-            // Try to parse as single movie if no items array
-            try {
-                Movie movie = parseMovieFromJson(responseObj);
-                if (isValidMovie(movie)) {
-                    movies.add(movie);
-                    Log.d(TAG, "Added single movie: " + movie.getTitle());
-                }
-            } catch (JSONException e) {
-                Log.w(TAG, "Could not parse response as single movie", e);
-            }
+        } catch (JSONException e) {
+            Log.w(TAG, "Could not parse response as single movie", e);
         }
 
         Log.d(TAG, "Finished parsing, found " + movies.size() + " movies");
@@ -342,6 +359,7 @@ public class RapidApiClient {
 
     private static Movie parseMovieFromAutoCompleteJson(JSONObject item) throws JSONException {
         Movie movie = new Movie();
+        Log.d(TAG, "Parsing auto-complete movie item: " + item.toString());
 
         // Handle auto-complete format specific fields
         String id = item.optString("id", "");
@@ -357,7 +375,7 @@ public class RapidApiClient {
 
         // Image might be in 'i' object with 'imageUrl' field
         JSONObject imageObj = item.optJSONObject("i");
-        if (imageObj != null) {
+        if (imageObj != null && imageObj.has("imageUrl")) {
             String imageUrl = imageObj.optString("imageUrl", "");
             movie.setPoster(imageUrl);
         }
@@ -372,11 +390,13 @@ public class RapidApiClient {
         String stars = item.optString("s", "");
         movie.setActors(stars);
 
+        Log.d(TAG, "Parsed auto-complete movie: " + movie.getTitle() + " (" + movie.getYear() + ")");
         return movie;
     }
 
     private static Movie parseMovieFromJson(JSONObject item) throws JSONException {
         Movie movie = new Movie();
+        Log.d(TAG, "Parsing movie item: " + item.toString().substring(0, Math.min(200, item.toString().length())) + "...");
 
         // Handle different API response formats
         String id = item.optString("id", "");
@@ -392,6 +412,9 @@ public class RapidApiClient {
         }
         if (title.isEmpty()) {
             title = item.optString("name", "Unknown Title");
+        }
+        if (title.isEmpty()) {
+            title = item.optString("fullTitle", "");
         }
         movie.setTitle(title);
 
@@ -409,6 +432,9 @@ public class RapidApiClient {
         }
         if (poster.isEmpty()) {
             poster = item.optString("posterUrl", "");
+        }
+        if (poster.isEmpty()) {
+            poster = item.optString("poster", "");
         }
         movie.setPoster(poster);
 
@@ -431,6 +457,7 @@ public class RapidApiClient {
         movie.setRuntime(item.optString("runtimeMinutes", "N/A") + " mins");
         movie.setReleased(item.optString("releaseDate", ""));
 
+        Log.d(TAG, "Parsed movie: " + movie.getTitle() + " (" + movie.getYear() + ")");
         return movie;
     }
 
@@ -438,17 +465,25 @@ public class RapidApiClient {
         JSONObject response = new JSONObject(jsonResponse);
         Movie movie = parseMovieFromJson(response);
 
+        Log.d(TAG, "Parsing movie details response: " + jsonResponse.substring(0, Math.min(200, jsonResponse.length())) + "...");
+
         // Additional details specific to movie details response
         movie.setBackdropUrl(response.optString("backdrop", ""));
         movie.setDirector(response.optString("directors", "Unknown"));
         movie.setActors(response.optString("stars", ""));
 
+        Log.d(TAG, "Parsed movie details: " + movie.getTitle() + " directed by " + movie.getDirector());
         return movie;
     }
 
     private static boolean isValidMovie(Movie movie) {
-        return movie.getImdbID() != null && !movie.getImdbID().isEmpty() &&
+        boolean isValid = movie.getImdbID() != null && !movie.getImdbID().isEmpty() &&
                 movie.getTitle() != null && !movie.getTitle().isEmpty();
+
+        if (!isValid) {
+            Log.w(TAG, "Invalid movie object detected - missing ID or title");
+        }
+        return isValid;
     }
 
     private static void notifySuccess(final OnMoviesLoadedListener listener, final List<Movie> movies) {
