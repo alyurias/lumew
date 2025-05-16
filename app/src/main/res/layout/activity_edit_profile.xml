@@ -51,8 +51,8 @@
                     android:layout_height="32dp"
                     android:layout_alignBottom="@id/edit_profile_image"
                     android:layout_alignEnd="@id/edit_profile_image"
-                    android:src="@drawable/ic_camera"
-                    android:background="@drawable/circle_background" />
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.LumeW.Circle"
+                    android:src="@drawable/ic_camera" />
             </RelativeLayout>
 
             <!-- Display Name -->
