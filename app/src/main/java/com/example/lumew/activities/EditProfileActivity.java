@@ -1,5 +1,7 @@
 package com.example.lumew.activities;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,11 +11,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.lumew.R;
 import com.example.lumew.models.User;
 import com.example.lumew.utils.FirebaseUtil;
+import com.example.lumew.utils.ImageUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -30,6 +35,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private User userProfile;
     private FirebaseUtil firebaseUtil;
+    private Uri selectedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +71,26 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        profileImageView.setOnClickListener(v -> {
-            // Optional: Can remove or keep for future implementation
-            Toast.makeText(this, "Profile image upload is not available", Toast.LENGTH_SHORT).show();
-        });
+        profileImageView.setOnClickListener(v -> showImagePickerOptions());
 
         saveButton.setOnClickListener(v -> saveProfile());
         backButton.setOnClickListener(v -> onBackPressed());
+    }
+
+    private void showImagePickerOptions() {
+        String[] options = {"Choose from Gallery", "Cancel"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Change Profile Picture");
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0) {
+                // Choose from gallery
+                Intent pickImageIntent = ImageUtils.getImagePickerIntent();
+                startActivityForResult(pickImageIntent, ImageUtils.PICK_IMAGE_REQUEST);
+            }
+            dialog.dismiss();
+        });
+        builder.show();
     }
 
     private void loadUserProfile() {
@@ -120,6 +139,11 @@ public class EditProfileActivity extends AppCompatActivity {
         if (userProfile.getBio() != null) {
             bioEditText.setText(userProfile.getBio());
         }
+
+        // Load profile image if available
+        if (userProfile.getProfileImageUrl() != null && !userProfile.getProfileImageUrl().isEmpty()) {
+            ImageUtils.loadImageFromUrl(this, userProfile.getProfileImageUrl(), profileImageView);
+        }
     }
 
     private void saveProfile() {
@@ -145,7 +169,32 @@ public class EditProfileActivity extends AppCompatActivity {
 
         showLoading(true);
 
-        // Use updateUserProfile method from FirebaseUtil instance
+        // If there's a new image selected, upload it first
+        if (selectedImageUri != null) {
+            uploadProfileImage();
+        } else {
+            // No new image, just update the profile
+            updateUserProfile();
+        }
+    }
+
+    private void uploadProfileImage() {
+        firebaseUtil.uploadProfileImage(currentUser.getUid(), selectedImageUri, new FirebaseUtil.ProfileImageCallback() {
+            @Override
+            public void onSuccess(String imageUrl) {
+                userProfile.setProfileImageUrl(imageUrl);
+                updateUserProfile();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                showLoading(false);
+                Toast.makeText(EditProfileActivity.this, "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateUserProfile() {
         firebaseUtil.updateUserProfile(userProfile, new FirebaseUtil.ResultCallback() {
             @Override
             public void onSuccess() {
@@ -166,11 +215,38 @@ public class EditProfileActivity extends AppCompatActivity {
     private void showLoading(boolean isLoading) {
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!isLoading);
+        profileImageView.setEnabled(!isLoading);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ImageUtils.PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            selectedImageUri = data.getData();
+
+            // Display the selected image
+            ImageUtils.loadImage(this, selectedImageUri, profileImageView);
+            Toast.makeText(this, "Image selected. Save to upload.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
+        // If changes have been made but not saved, show confirmation dialog
+        if (selectedImageUri != null) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Discard Changes")
+                    .setMessage("You have unsaved changes. Are you sure you want to discard them?")
+                    .setPositiveButton("Discard", (dialog, which) -> {
+                        setResult(RESULT_CANCELED);
+                        super.onBackPressed();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } else {
+            setResult(RESULT_CANCELED);
+            super.onBackPressed();
+        }
     }
 }

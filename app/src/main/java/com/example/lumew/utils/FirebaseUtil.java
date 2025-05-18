@@ -25,6 +25,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -287,6 +288,127 @@ public class FirebaseUtil {
                     } else {
                         callback.onFailure(task.getException());
                     }
+                });
+    }
+
+    /**
+     * Upload a profile image to Firebase Storage with compression
+     * @param userId User ID for whom the image is being uploaded
+     * @param imageUri URI of the image to upload
+     * @param context Application context for accessing ContentResolver
+     * @param callback Callback for the result
+     */
+    public void uploadProfileImageWithCompression(String userId, Uri imageUri, Context context, ProfileImageCallback callback) {
+        if (imageUri == null) {
+            callback.onFailure(new IllegalArgumentException("Image URI cannot be null"));
+            return;
+        }
+
+        try {
+            // Compress the image to reduce upload size and bandwidth
+            byte[] compressedImageData = ImageUtils.compressImage(context, imageUri);
+            if (compressedImageData == null) {
+                callback.onFailure(new Exception("Failed to compress image"));
+                return;
+            }
+
+            String imageName = UUID.randomUUID().toString() + ".jpg";
+            StorageReference imageRef = storage.getReference()
+                    .child(PROFILE_IMAGES_FOLDER)
+                    .child(userId)
+                    .child(imageName);
+
+            // Upload the compressed image bytes
+            UploadTask uploadTask = imageRef.putBytes(compressedImageData);
+
+            uploadTask.continueWithTask(task -> {
+                if (!task.isSuccessful() && task.getException() != null) {
+                    throw task.getException();
+                }
+                return imageRef.getDownloadUrl();
+            }).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    Log.d(TAG, "Profile image uploaded for user: " + userId);
+                    callback.onSuccess(downloadUri.toString());
+                } else {
+                    Log.e(TAG, "Failed to upload profile image", task.getException());
+                    callback.onFailure(task.getException());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in image upload process", e);
+            callback.onFailure(e);
+        }
+    }
+
+    /**
+     * Delete an old profile image from Firebase Storage
+     * @param userId User ID
+     * @param imageUrl URL of the image to delete
+     */
+    public void deleteOldProfileImage(String userId, String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return;
+        }
+
+        try {
+            StorageReference photoRef = storage.getReferenceFromUrl(imageUrl);
+            photoRef.delete().addOnSuccessListener(aVoid -> {
+                Log.d(TAG, "Old profile image deleted for user: " + userId);
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Error deleting old profile image", e);
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse image reference", e);
+        }
+    }
+
+    /**
+     * Get all profile images for a user
+     * @param userId User ID
+     * @param callback Callback for the result
+     */
+    public void getUserProfileImages(String userId, ListResultCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onFailure(new IllegalArgumentException("User ID cannot be null or empty"));
+            return;
+        }
+
+        StorageReference userImagesRef = storage.getReference()
+                .child(PROFILE_IMAGES_FOLDER)
+                .child(userId);
+
+        userImagesRef.listAll()
+                .addOnSuccessListener(callback::onSuccess)
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Update profile image URL in user document
+     * @param userId User ID
+     * @param imageUrl New image URL
+     * @param callback Callback for the result
+     */
+    public void updateProfileImageUrl(String userId, String imageUrl, ResultCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onFailure(new IllegalArgumentException("User ID cannot be null or empty"));
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profileImageUrl", imageUrl);
+        updates.put("lastUpdated", FieldValue.serverTimestamp());
+
+        db.collection(USERS_COLLECTION).document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Profile image URL updated for user: " + userId);
+                    callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update profile image URL", e);
+                    callback.onFailure(e);
                 });
     }
 
@@ -730,6 +852,11 @@ public class FirebaseUtil {
     // Add this new interface for the specific movie callback
     public interface MovieCallback {
         void onSuccess(Movie movie);
+        void onFailure(Exception e);
+    }
+
+    public interface ListResultCallback {
+        void onSuccess(ListResult result);
         void onFailure(Exception e);
     }
 }
